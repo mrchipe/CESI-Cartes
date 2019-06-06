@@ -22,12 +22,17 @@ class Cards
     private $min;
     private $max;
 
+    private $usePC;
+
     /**
      * Cette fonction est appelé quand on construit l'objet Cards (ex: new Cards())
      * @param int $size : Si la valeur est strictement égale a 32, la valeur de $this->min = 2, sinon $this->min = 7
+     * @param bool $usePC
      */
-    public function __construct(int $size = 52)
+    public function __construct(int $size = 52, bool $usePC = true)
     {
+        $this->usePC = $usePC;
+
         $this->min = $size === 32 ? 7 : 2;
         $this->max = 14;
 
