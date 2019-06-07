@@ -1,18 +1,16 @@
 <?php
 
-session_start();
-$_SESSION['flash'] = [];
-
-include_once './functions.php';
+include_once './includes/bootstrap.php';
+$session = Session::getInstance();
 
 if (isset($_POST['choose_number_player'])) {
     $numberPlayer = isset($_POST['number_player']) ? $_POST['number_player'] : null;
 
     if (intval($numberPlayer) && $numberPlayer <= 4) {
-        view('pseudo_form');
+        App::view('pseudo_form');
     }
 
-    $_SESSION['flash']['number_player'] = true;
+    $session->setFlash('danger', 'Le nombre de joueurs n\'est pas valide.');
 }
 
 if (isset($_POST['choose_pseudo_player'])) {
@@ -38,7 +36,7 @@ if (isset($_POST['choose_pseudo_player'])) {
         'cartNumber' => $cartNumber
     ];
 
-    return header('Location: game.php');
+    App::redirect('game.php');
 }
 
-view('start_form');
+App::view('start_form');

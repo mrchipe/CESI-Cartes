@@ -1,7 +1,7 @@
 <?php
 
-session_start();
-include_once './functions.php';
+include_once './includes/bootstrap.php';
+$session = Session::getInstance();
 
 if (!isset($_SESSION['game'])) {
     return header('Location: index.php');
