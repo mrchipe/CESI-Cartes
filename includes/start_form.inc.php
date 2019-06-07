@@ -22,6 +22,6 @@
 
     <div>
         <input type="hidden" name="choose_number_player">
-        <button type="submit" class="btn btn-secondary">Validé</button>
+        <button type="submit" class="btn btn-secondary">Valider</button>
     </div>
 </form>

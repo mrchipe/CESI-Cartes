@@ -15,5 +15,5 @@
 
     <input type="hidden" name="choose_pseudo_player">
     <input type="hidden" name="cartNumber" value="<?= isset($_POST['cartNumber']) ? $_POST['cartNumber'] : 52 ?>">
-    <button type="submit" class="btn btn-secondary">Validé</button>
+    <button type="submit" class="btn btn-secondary">Valider</button>
 </form>
