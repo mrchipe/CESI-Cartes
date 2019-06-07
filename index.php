@@ -38,7 +38,7 @@ if (isset($_POST['choose_pseudo_player'])) {
         'cartNumber' => $cartNumber
     ];
 
-    return header('Location: /game.php');
+    return header('Location: game.php');
 }
 
 view('start_form');
