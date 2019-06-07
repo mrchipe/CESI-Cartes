@@ -8,7 +8,7 @@ include_once './functions.php';
 if (isset($_POST['choose_number_player'])) {
     $numberPlayer = isset($_POST['number_player']) ? $_POST['number_player'] : null;
 
-    if (intval($numberPlayer)) {
+    if (intval($numberPlayer) && $numberPlayer <= 4) {
         view('pseudo_form');
     }
 
