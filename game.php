@@ -4,8 +4,10 @@ include_once './includes/bootstrap.php';
 $session = Session::getInstance();
 
 if (!isset($_SESSION['game'])) {
-    return header('Location: index.php');
+    App::redirect('index.php');
 }
 
-// Début de la partie
-die(var_dump($_SESSION['game']));
+// $_SESSION['game']['cartNumber'], $_SESSION['game']['players'], $_SESSION['game']['playerPc']
+$game = new Game($session);
+
+die(var_dump($game));
