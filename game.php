@@ -4,7 +4,7 @@ session_start();
 include_once './functions.php';
 
 if (!isset($_SESSION['game'])) {
-    return header('Location: /');
+    return header('Location: index.php');
 }
 
 // Début de la partie
