@@ -2,10 +2,10 @@
 
 class Cards
 {
+    const DEFAULT_SIZE = 52;
+
     private $cards = [];
-
-    private $figures = ['carreaux', 'treffles', 'piques', 'coeurs'];
-
+    private $figures = ['carreaux' => 'red', 'treffles' => 'black', 'piques' => 'black', 'coeurs' => 'red'];
     private $min;
     private $max;
 
@@ -13,7 +13,7 @@ class Cards
      * Cette fonction est appelé quand on construit l'objet Cards (ex: new Cards())
      * @param int $size : Si la valeur est strictement égale a 32, la valeur de $this->min = 2, sinon $this->min = 7
      */
-    public function __construct(int $size = 52)
+    public function __construct(int $size = self::DEFAULT_SIZE)
     {
         $this->min = $size === 32 ? 7 : 2;
         $this->max = 14;
@@ -30,10 +30,11 @@ class Cards
         $cards = [];
 
         for ($i = $this->min; $i <= $this->max; $i++) {
-            foreach ($this->figures as $figure) {
+            foreach ($this->figures as $figure => $color) {
                 $cards[] = [
                     'value' => $i,
-                    'figure' => $figure
+                    'figure' => $figure,
+                    'color' => $color
                 ];
             }
         }

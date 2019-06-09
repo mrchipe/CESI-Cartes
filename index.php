@@ -1,42 +1,57 @@
 <?php
 
 include_once './includes/bootstrap.php';
-$session = Session::getInstance();
 
-if (isset($_POST['choose_number_player'])) {
-    $numberPlayer = isset($_POST['number_player']) ? $_POST['number_player'] : null;
-
-    if (intval($numberPlayer) && $numberPlayer <= 4) {
-        App::view('pseudo_form');
-    }
-
-    $session->setFlash('danger', 'Le nombre de joueurs n\'est pas valide.');
+if (get('restart')) {
+    Game::getInstance()->restartGame();
 }
 
-if (isset($_POST['choose_pseudo_player'])) {
-    $players = [];
-    $playerPc = false;
-    $cartNumber = isset($_POST['cartNumber']) ? intval($_POST['cartNumber']) : 52;
+/*
+ * Game start
+ */
+if (GameStatus::getStatus() === GameStatus::START) {
+    // Step 1
+    if (get('step') === 1 && get('number_player') && get('cart_number')) {
+        view('start/step2.php', [
+            'number_player' => get('number_player'),
+            'cart_number' => get('cart_number')
+        ]);
+    }
 
-    $i = 1;
-    foreach ($_POST as $item => $value) {
-        if (substr($item, 0, 14) === "pseudo_player_") {
-            $players[] = empty(trim($value)) ? 'Joueur ' . $i : trim($value);
-            $i++;
+    // Step 2
+    if (get('step') === 2 && get('cart_number')) {
+        $players = [];
+        foreach (all() as $var => $value) {
+            if (substr($var, 0, 14) === 'pseudo_player_') {
+                $players[] = [
+                    'pseudo' => $value ? $value : 'Joueur ' . substr($var, 14)
+                ];
+            }
         }
+
+        $cartNumber = get('cart_number') ? get('cart_number') : Cards::DEFAULT_SIZE;
+
+        Game::getInstance()->startGame($players, $cartNumber);
     }
 
-    if ((isset($_POST['player_pc']) && $_POST['player_pc'] === 'on') || count($players) <= 1) {
-        $playerPc = true;
-    }
-
-    $_SESSION['game'] = [
-        'players' => $players,
-        'playerPc' => $playerPc,
-        'cartNumber' => $cartNumber
-    ];
-
-    App::redirect('game.php');
+    view('start/step1.php');
 }
 
-App::view('start_form');
+/*
+ * Game
+ */
+if (GameStatus::getStatus() === GameStatus::GAME) {
+    $nextTour = Game::getInstance()->nextTour();
+    view('game/index.php', [
+        'cards' => $nextTour['cards'],
+        'winner' => $nextTour['winner'],
+        'players' => Players::getInstance()->getPlayers()
+    ]);
+}
+
+/*
+ * Game end
+ */
+if (GameStatus::getStatus() === GameStatus::END) {
+    die('end');
+}

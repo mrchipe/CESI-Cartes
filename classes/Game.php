@@ -2,55 +2,105 @@
 
 class Game
 {
-    /** @var Cards */
-    private $cards;
-
-    /** @var Players */
-    private $players;
-
-    private $computer;
-    private $tour = 0;
+    private static $instance;
 
     public function __construct()
     {
-        $session = Session::getInstance();
+        Session::getInstance();
+    }
 
-        if (isset($_SESSION['game'])) {
-            if ($_SESSION['game'] instanceof Game) {
-                die('yes');
-            } else {
-                $this->initGame($_SESSION['game']['cartNumber'], $_SESSION['game']['players'], $_SESSION['game']['playerPc']);
-            }
-        } else {
-            $session->setFlash('danger', 'Une erreur est survenu lors de la création de la partie.');
-            App::redirect('index.php');
+    public static function getInstance(): Game
+    {
+        if (!self::$instance) {
+            self::$instance = new Game();
         }
+
+        return self::$instance;
     }
 
-    public function initGame(int $numberCards, array $players, bool $computer = false)
+    public function startGame(array $players, int $cartNumber)
     {
-        $this->cards = new Cards($numberCards);
-        $this->players = new Players();
-        $this->computer = $computer;
+        $cardsByPlayer = floor($cartNumber / count($players));
+        $cards = array_chunk((new Cards($cartNumber))->getCards(), $cardsByPlayer);
 
-        $this->initPlayers($numberCards, $players);
-    }
+        $_players = [];
 
-    private function initPlayers(int $numberCards, array $players): void
-    {
-        $cardByPlayer = floor($numberCards / count($players));
-        $cards = array_chunk($this->cards->getCards(), $cardByPlayer);
-
-        foreach ($players as $key => $pseudo) {
-            $this->players->addPlayers([
-                'pseudo' => $pseudo,
+        foreach ($players as $key => $player) {
+            $_players[] = [
+                'pseudo' => $player['pseudo'],
                 'cards' => $cards[$key]
-            ]);
+            ];
         }
+
+        $_SESSION['game']['card_number'] = $cartNumber;
+
+        Players::getInstance()->setPlayers($_players);
+        GameStatus::setStatus(GameStatus::GAME);
+
+        redirect('index.php');
     }
 
-    private function next()
+    public function nextTour(?array $onlyPlayer = null): array
     {
-        //
+        $cards = [];
+        $players = Players::getInstance()->getPlayers();
+
+        foreach ($players as $index => $player) {
+            if (!is_null($onlyPlayer)) {
+                if (!in_array($index, $onlyPlayer)) {
+                    continue;
+                }
+            }
+
+            if (isset($player['lose']) && $player['lose'] == true) {
+                continue;
+            }
+
+            if (empty($player['cards'])) {
+                $player['lose'] = true;
+            } else {
+                $card = array_shift($player['cards']);
+                $cards[$index] = $card;
+            }
+
+            $players[$index] = $player;
+        }
+
+        $currentMax = null;
+        $winner = null;
+        foreach ($cards as $index => $card) {
+            if ($card['value'] >= $currentMax) {
+                $currentMax = $card['value'];
+                $winner = $index;
+            }
+        }
+
+        $equals = [];
+        foreach ($cards as $index => $card) {
+            if ($index !== $winner && $currentMax == $card['value']) {
+                $equals[] = $index;
+            }
+        }
+
+        $players[$winner]['cards'] = array_merge($players[$winner]['cards'], $cards);
+
+        Players::getInstance()->setPlayers($players);
+
+        return [
+            'winner' => $winner,
+            'cards' => $cards,
+            'equals' => $equals
+        ];
+    }
+
+    public function restartGame()
+    {
+        if (isset($_SESSION['game'])) {
+            unset($_SESSION['game']);
+        }
+
+        GameStatus::setStatus(GameStatus::START);
+
+        redirect('index.php');
     }
 }

@@ -2,27 +2,29 @@
 
 class Players
 {
-    /**
-     * [
-     *      1 => [
-     *          'cards' => [
-     *              // toutes les cartes qu'a le joueur
-     *          ],
-     *          'pseudo' => 'Mon pseudo'
-     *      ]
-     * ]
-     *
-     * @var array $players : Liste des joueurs avec leurs infos
-     */
-    private $players = [];
+    private static $instance;
 
-    public function addPlayers(array $player): void
+    public function __construct()
     {
-        $this->players[] = $player;
+        Session::getInstance();
+    }
+
+    public static function getInstance(): Players
+    {
+        if (!self::$instance) {
+            self::$instance = new Players();
+        }
+
+        return self::$instance;
+    }
+
+    public function setPlayers(array $players): void
+    {
+        $_SESSION['game']['players'] = $players;
     }
 
     public function getPlayers(): array
     {
-        return $this->players;
+        return isset($_SESSION['game']['players']) ? $_SESSION['game']['players'] : [];
     }
 }
